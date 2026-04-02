@@ -7,7 +7,15 @@ const path = require('path');
 // Load environment variables
 dotenv.config();
 
+// Validate critical environment variables
+if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+    console.warn('⚠️ WARNING: EMAIL_USER and EMAIL_PASSWORD not set. Email functionality will not work.');
+}
+
 const app = express();
+
+// Admin email from environment variable
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'support@rnherbalindia.com';
 
 // Middleware
 app.use(cors());
@@ -205,7 +213,7 @@ app.post('/api/submit-order', async (req, res) => {
         // Send email to admin
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
-            to: 'digital.work.3442@gmail.com',
+            to: ADMIN_EMAIL,
             subject: `🎉 New Order from ${name} - RN Herbal India`,
             html: adminEmailContent
         });
@@ -240,8 +248,13 @@ app.post('/api/submit-order', async (req, res) => {
     }
 });
 
-// Basic route for testing
+// Serve landing page
 app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Serve order page
+app.get('/order', (req, res) => {
     res.sendFile(path.join(__dirname, 'order.html'));
 });
 
@@ -258,7 +271,9 @@ app.use((err, req, res, next) => {
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`🚀 Server is running on http://localhost:${PORT}`);
-    console.log(`📧 Email system configured for: ${process.env.EMAIL_USER}`);
-    console.log(`💼 Admin email: digital.work.3442@gmail.com`);
+    console.log(`🚀 Server is running on port ${PORT}`);
+    if (process.env.NODE_ENV === 'development') {
+        console.log(`📧 Email system configured for: ${process.env.EMAIL_USER}`);
+        console.log(`💼 Admin email: ${ADMIN_EMAIL}`);
+    }
 });
