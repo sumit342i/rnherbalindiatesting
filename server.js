@@ -18,9 +18,9 @@ const app = express();
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'support@rnherbalindia.com';
 
 // Middleware
-app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname)));
+app.use(cors());
+app.use(express.static(path.join(__dirname, '.')));
 
 // Configure Nodemailer transporter
 const transporter = nodemailer.createTransport({
